@@ -13,6 +13,12 @@ export default {
   name: 'Content',
   data() {
     return {
+      statDocuments: [{
+        index: Number,
+        term: String,
+        TF: Number,
+        TF_IDF: Number
+      }],
       documents: []
     }
   },
@@ -24,7 +30,15 @@ export default {
         const stringArray = result.split("\n")
         stringArray.forEach((element) => {
           this.documents.push(element)
+          const stringDocuments = element.split(" ")
+          stringDocuments.forEach((elem, index) => {
+            this.statDocuments.push({
+              index,
+              elem
+            })
+          })
         })
+        this.getStats()
         this.Resultado()
       });
     },
@@ -46,6 +60,9 @@ export default {
         list.appendChild(doc)
       })
       page.appendChild(list)
+    },
+    getStats() {
+      console.log(this.statDocuments);
     }
   }
 }
