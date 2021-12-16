@@ -13,32 +13,42 @@ export default {
   name: 'Content',
   data() {
     return {
+      documents: [],
       statDocuments: [{
-        index: Number,
+        doc_index: Number,
+        term_index: Number,
         term: String,
         TF: Number,
         TF_IDF: Number
-      }],
-      documents: []
+      }]
     }
   },
   methods: {
     getData() {
       this.documents = []
+      this.statDocuments = []
       const file = document.getElementById("input-file").files[0];  // Leemos el contenido del fichero
       this.readFileContent(file).then(result => {
-        const stringArray = result.split("\n")
-        stringArray.forEach((element) => {
-          this.documents.push(element)
-          const stringDocuments = element.split(" ")
-          stringDocuments.forEach((elem, index) => {
-            this.statDocuments.push({
-              index,
-              elem
-            })
+        const stringArray = result.split("\n")                      // Dividimos todo el texto en documentos (oraciones)
+        stringArray.forEach((element, doc_index) => {               // Cada oracion es un element, junto con su indice
+          this.documents.push(element)                              // Añadimos el documento al vector de documentos
+          element = element.replace(/,/g,'')                        // Quitamos las comas
+          element = element.replaceAll('.', '');                    // Quitamos los puntos
+          element = element.toLowerCase()                           // Modificamos todas las palabras a minuscula
+          const stringDocuments = element.split(" ")                // Dividmos cada oraciones en palabras (terminos)
+          stringDocuments.forEach((term, term_index) => {           // Añadimos el indice del documento, el indice del termino, y el propio termino
+            if (term.length > 3) {
+              if (term !== "isn't" && term !== "this"               // Comprobamos que sea una palabra medianamente util
+                  && term !== "it's" && term !== "that") {
+                this.statDocuments.push({
+                  doc_index,
+                  term_index,
+                  term
+                })
+              }
+            }
           })
         })
-        this.getStats()
         this.Resultado()
       });
     },
@@ -51,18 +61,25 @@ export default {
       })
     },
     Resultado() {
-      document.getElementById("solucion").innerHTML = '';
+      document.getElementById("solucion").innerHTML = '';              // Creamos la solucion
       const page = document.getElementById("solucion");
-      const list = document.createElement("ul")
-      this.documents.forEach((element) => {
+      const list = document.createElement("ul")                        // Creamos una pagina
+      let i = 1                                                        // Añadimos un indice extra
+      this.documents.forEach((element, index) => {
         const doc = document.createElement("li")
         doc.innerHTML = element
-        list.appendChild(doc)
+        list.appendChild(doc)                                          // Añadimos cada documento a la lista
+        const sublist = document.createElement("ul")                   // Creamos una sublista por cada documento
+        while (this.statDocuments[i].doc_index === index) {            // Comprobamos si el indice de de los terminos coinciden con el de los documentos
+          const term = document.createElement("li")                    // Si coincide lo añadimos a la sublista
+          term.innerHTML = this.statDocuments[i].term
+          sublist.appendChild(term)
+          i = i + 1                                                    // Avanzamos en el vector
+          if (i === this.statDocuments.length) break                   // Hasta que no supere la longitud del vector statsDocuments
+        }
+        list.appendChild(sublist)
       })
       page.appendChild(list)
-    },
-    getStats() {
-      console.log(this.statDocuments);
     }
   }
 }
