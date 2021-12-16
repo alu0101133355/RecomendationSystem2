@@ -19,9 +19,14 @@ export default {
         term_index: Number,
         term: String,
         TF: Number,
+        IDF: Number,
         TF_IDF: Number
-      }]
+      }],
+      lengths: []
     }
+  },
+  mounted () {
+    this.i = 1
   },
   methods: {
     getData() {
@@ -36,19 +41,16 @@ export default {
           element = element.replaceAll('.', '');                    // Quitamos los puntos
           element = element.toLowerCase()                           // Modificamos todas las palabras a minuscula
           const stringDocuments = element.split(" ")                // Dividmos cada oraciones en palabras (terminos)
-          stringDocuments.forEach((term, term_index) => {           // Añadimos el indice del documento, el indice del termino, y el propio termino
-            if (term.length > 3) {
-              if (term !== "isn't" && term !== "this"               // Comprobamos que sea una palabra medianamente util
-                  && term !== "it's" && term !== "that") {
-                this.statDocuments.push({
-                  doc_index,
-                  term_index,
-                  term
-                })
-              }
-            }
+          this.lengths.push(stringDocuments.length)
+          stringDocuments.forEach((term, term_index) => {                       // Añadimos el indice del documento, el indice del termino, y el propio termino
+            this.statDocuments.push({
+              doc_index,
+              term_index,
+              term
+            })
           })
         })
+        this.calculateTF_IDF()
         this.Resultado()
       });
     },
@@ -64,7 +66,7 @@ export default {
       document.getElementById("solucion").innerHTML = '';              // Creamos la solucion
       const page = document.getElementById("solucion");
       const list = document.createElement("ul")                        // Creamos una pagina
-      let i = 1                                                        // Añadimos un indice extra
+      let i = 0                                                        // Añadimos un indice extra
       this.documents.forEach((element, index) => {
         const doc = document.createElement("li")
         doc.innerHTML = element
@@ -72,7 +74,7 @@ export default {
         const sublist = document.createElement("ul")                   // Creamos una sublista por cada documento
         while (this.statDocuments[i].doc_index === index) {            // Comprobamos si el indice de de los terminos coinciden con el de los documentos
           const term = document.createElement("li")                    // Si coincide lo añadimos a la sublista
-          term.innerHTML = this.statDocuments[i].term
+          term.innerHTML = this.statDocuments[i].term_index + " " + this.statDocuments[i].term + " " + this.statDocuments[i].TF + " " + this.statDocuments[i].IDF + " " + this.statDocuments[i].TF_IDF
           sublist.appendChild(term)
           i = i + 1                                                    // Avanzamos en el vector
           if (i === this.statDocuments.length) break                   // Hasta que no supere la longitud del vector statsDocuments
@@ -80,6 +82,26 @@ export default {
         list.appendChild(sublist)
       })
       page.appendChild(list)
+      console.log(this.statDocuments);
+    },
+    calculateTF_IDF() { 
+      for (let i = 0; i < this.statDocuments.length; i++) {
+        let sameDocCount = -1
+        let otherDocCount = new Set()
+        for (let j = 0; j < this.statDocuments.length; j++) {
+          if (this.statDocuments[i].term === this.statDocuments[j].term) {
+            if (this.statDocuments[i].doc_index === this.statDocuments[j].doc_index) {
+              sameDocCount = sameDocCount + 1
+            } else {
+              otherDocCount.add(this.statDocuments[j].doc_index)
+            }
+          }
+        }
+        console.log(otherDocCount);
+        this.statDocuments[i].TF = sameDocCount
+        this.statDocuments[i].IDF = Math.log(this.documents.length / otherDocCount.size) / Math.log(10)
+        this.statDocuments[i].TF_IDF = sameDocCount * (Math.log(this.documents.length / otherDocCount.size) / Math.log(10))
+      }
     }
   }
 }
