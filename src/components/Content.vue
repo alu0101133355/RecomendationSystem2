@@ -22,7 +22,12 @@ export default {
         IDF: Number,
         TF_IDF: Number
       }],
-      lengths: []
+      lengths: [],
+      simCosArray: [{
+        x: Number,
+        y: Number,
+        sim: Number
+      }]
     }
   },
   mounted () {
@@ -30,6 +35,7 @@ export default {
   },
   methods: {
     getData() {
+      alert("El programa puede tardar hasta 15 segundos")
       this.documents = []
       this.statDocuments = []
       const file = document.getElementById("input-file").files[0];  // Leemos el contenido del fichero
@@ -51,6 +57,7 @@ export default {
           })
         })
         this.calculateTF_IDF()
+        this.simCos()
         this.Resultado()
       });
     },
@@ -74,7 +81,11 @@ export default {
         const sublist = document.createElement("ul")                   // Creamos una sublista por cada documento
         while (this.statDocuments[i].doc_index === index) {            // Comprobamos si el indice de de los terminos coinciden con el de los documentos
           const term = document.createElement("li")                    // Si coincide lo añadimos a la sublista
-          term.innerHTML = this.statDocuments[i].term_index + " " + this.statDocuments[i].term + " " + this.statDocuments[i].TF + " " + this.statDocuments[i].IDF + " " + this.statDocuments[i].TF_IDF
+          term.innerHTML = this.statDocuments[i].term_index 
+                           + " - " + this.statDocuments[i].term
+                           + " - " + this.statDocuments[i].TF
+                           + " - " + this.statDocuments[i].IDF
+                           + " - " + this.statDocuments[i].TF_IDF
           sublist.appendChild(term)
           i = i + 1                                                    // Avanzamos en el vector
           if (i === this.statDocuments.length) break                   // Hasta que no supere la longitud del vector statsDocuments
@@ -82,12 +93,23 @@ export default {
         list.appendChild(sublist)
       })
       page.appendChild(list)
-      console.log(this.statDocuments);
+      const simCosList = document.createElement("ul");
+      this.simCosArray.forEach((element, index) => {
+        if (index !== 0) {
+          const simTerm = document.createElement("li");
+          simTerm.innerHTML = "simCos(" + element.x + ", " + element.y + ") = " + element.sim;
+          simCosList.appendChild(simTerm)
+        }
+      })
+      page.appendChild(simCosList)
+      
+
     },
     calculateTF_IDF() { 
       for (let i = 0; i < this.statDocuments.length; i++) {
-        let sameDocCount = -1
+        let sameDocCount = 0
         let otherDocCount = new Set()
+        otherDocCount.add("Initialized")
         for (let j = 0; j < this.statDocuments.length; j++) {
           if (this.statDocuments[i].term === this.statDocuments[j].term) {
             if (this.statDocuments[i].doc_index === this.statDocuments[j].doc_index) {
@@ -97,10 +119,25 @@ export default {
             }
           }
         }
-        console.log(otherDocCount);
-        this.statDocuments[i].TF = sameDocCount
-        this.statDocuments[i].IDF = Math.log(this.documents.length / otherDocCount.size) / Math.log(10)
-        this.statDocuments[i].TF_IDF = sameDocCount * (Math.log(this.documents.length / otherDocCount.size) / Math.log(10))
+        this.statDocuments[i].TF = (sameDocCount / this.lengths[this.statDocuments[i].doc_index]).toFixed(3);
+        this.statDocuments[i].IDF = (Math.log(this.documents.length / otherDocCount.size) / Math.log(10)).toFixed(3)
+        this.statDocuments[i].TF_IDF = (this.statDocuments[i].TF * this.statDocuments[i].IDF).toFixed(4)
+      }
+    },
+    simCos() {
+      for (let i = 0; i < this.documents.length; i++) {
+        for (let j = 0; j < this.documents.length; j++) {
+          if (i === j) break
+          let sum = 0;
+          this.statDocuments.forEach(element => {
+            this.statDocuments.forEach(element2 => {
+              if (i === element.doc_index && j === element2.doc_index && element.term === element2.term) {
+                sum += element.TF_IDF * element2.TF_IDF
+              }
+            })
+          })
+          this.simCosArray.push({x: i, y: j, sim: (sum).toFixed(5)})
+        }
       }
     }
   }
