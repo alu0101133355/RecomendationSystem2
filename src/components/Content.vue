@@ -83,9 +83,9 @@ export default {
           const term = document.createElement("li")                    // Si coincide lo añadimos a la sublista
           term.innerHTML = this.statDocuments[i].term_index 
                            + " - " + this.statDocuments[i].term
-                           + " - " + this.statDocuments[i].TF
-                           + " - " + this.statDocuments[i].IDF
-                           + " - " + this.statDocuments[i].TF_IDF
+                           + " - " + "TF: " +this.statDocuments[i].TF
+                           + " - " + "IDF: " + this.statDocuments[i].IDF
+                           + " - " + "TF-IDF: " + this.statDocuments[i].TF_IDF
           sublist.appendChild(term)
           i = i + 1                                                    // Avanzamos en el vector
           if (i === this.statDocuments.length) break                   // Hasta que no supere la longitud del vector statsDocuments
