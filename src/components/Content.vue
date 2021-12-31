@@ -1,10 +1,10 @@
 <template>
-  <h1>Contenido</h1>
+  <h1>Recomendador. Modelos Basados en el contenido</h1>
   <div>
     <label for="input-file">Introduce un archivo:</label><br>
     <input type="file" id="input-file">
   </div>
-  <button class="button" v-on:click="getData">Calcular</button>
+  <button class="button" v-on:click="getData">Go</button>
   <div class="solucion" id="solucion"></div>
 </template>
 
@@ -35,20 +35,29 @@ export default {
   },
   methods: {
     getData() {
-      alert("El programa puede tardar hasta 15 segundos")
+      alert("El programa puede tardar un tiempo")
       this.documents = []
       this.statDocuments = []
-      const file = document.getElementById("input-file").files[0];  // Leemos el contenido del fichero
+      const file = document.getElementById("input-file").files[0];  
+      // Leemos el contenido del fichero
       this.readFileContent(file).then(result => {
-        const stringArray = result.split("\n")                      // Dividimos todo el texto en documentos (oraciones)
-        stringArray.forEach((element, doc_index) => {               // Cada oracion es un element, junto con su indice
-          this.documents.push(element)                              // Añadimos el documento al vector de documentos
-          element = element.replace(/,/g,'')                        // Quitamos las comas
-          element = element.replaceAll('.', '');                    // Quitamos los puntos
-          element = element.toLowerCase()                           // Modificamos todas las palabras a minuscula
-          const stringDocuments = element.split(" ")                // Dividmos cada oraciones en palabras (terminos)
+        const stringArray = result.split("\n")                      
+        // Dividimos todo el texto en documentos (oraciones)
+        stringArray.forEach((element, doc_index) => {               
+          // Cada oracion es un element, junto con su indice
+          this.documents.push(element)                              
+          // Añadimos el documento al vector de documentos
+          element = element.replace(/,/g,'')                       
+           // Quitamos las comas
+          element = element.replaceAll('.', '');                    
+          // Quitamos los puntos
+          element = element.toLowerCase()                           
+          // Modificamos todas las palabras a minuscula
+          const stringDocuments = element.split(" ")                
+          // Dividmos cada oraciones en palabras (terminos)
           this.lengths.push(stringDocuments.length)
-          stringDocuments.forEach((term, term_index) => {                       // Añadimos el indice del documento, el indice del termino, y el propio termino
+          stringDocuments.forEach((term, term_index) => {                       
+            // Añadimos el indice del documento, el indice del termino, y el propio termino
             this.statDocuments.push({
               doc_index,
               term_index,
@@ -70,25 +79,34 @@ export default {
       })
     },
     Resultado() {
-      document.getElementById("solucion").innerHTML = '';              // Creamos la solucion
+      document.getElementById("solucion").innerHTML = '';              
+      // Creamos la solucion
       const page = document.getElementById("solucion");
-      const list = document.createElement("ul")                        // Creamos una pagina
-      let i = 0                                                        // Añadimos un indice extra
+      const list = document.createElement("ul")                        
+      // Creamos una pagina
+      let i = 0                                                        
+      // Añadimos un indice extra
       this.documents.forEach((element, index) => {
         const doc = document.createElement("li")
         doc.innerHTML = element
-        list.appendChild(doc)                                          // Añadimos cada documento a la lista
-        const sublist = document.createElement("ul")                   // Creamos una sublista por cada documento
-        while (this.statDocuments[i].doc_index === index) {            // Comprobamos si el indice de de los terminos coinciden con el de los documentos
-          const term = document.createElement("li")                    // Si coincide lo añadimos a la sublista
+        list.appendChild(doc)                                          
+        // Añadimos cada documento a la lista
+        const sublist = document.createElement("ul")                  
+         // Creamos una sublista por cada documento
+        while (this.statDocuments[i].doc_index === index) {            
+          // Comprobamos si el indice de de los terminos coinciden con el de los documentos
+          const term = document.createElement("li")                    
+          // Si coincide lo añadimos a la sublista
           term.innerHTML = this.statDocuments[i].term_index 
                            + " - " + this.statDocuments[i].term
                            + " - " + "TF: " +this.statDocuments[i].TF
                            + " - " + "IDF: " + this.statDocuments[i].IDF
                            + " - " + "TF-IDF: " + this.statDocuments[i].TF_IDF
           sublist.appendChild(term)
-          i = i + 1                                                    // Avanzamos en el vector
-          if (i === this.statDocuments.length) break                   // Hasta que no supere la longitud del vector statsDocuments
+          i = i + 1                                                    
+          // Avanzamos en el vector
+          if (i === this.statDocuments.length) break                   
+          // Hasta que no supere la longitud del vector statsDocuments
         }
         list.appendChild(sublist)
       })
@@ -145,16 +163,18 @@ export default {
 </script>
 
 <style>
-.button {
-  margin: 20px;
-  height: 20px;
-  width: 60px;
-  background-color: lightblue;
-  border-radius: 8px;
-}
+
 
 input {
   margin: 10px;
+}
+
+.button {
+  margin: 50px;
+  height: 50px;
+  width: 60px;
+  background-color: rgb(18, 211, 82);
+  border-radius: 8px;
 }
 
 ul li {

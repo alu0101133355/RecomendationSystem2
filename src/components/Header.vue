@@ -1,5 +1,5 @@
 <template>
-  <h1>⚡ Sistema de recomendacion ⚡</h1>
+  <h1> Gestion del conocimiento en las organizaciones </h1>
 </template>
 
 <script>
